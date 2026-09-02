@@ -1,0 +1,90 @@
+{
+  "datasets": {
+    "ai4i": {
+      "dataset": "AI4I 2020 Predictive Maintenance",
+      "role": "剩余寿命（RUL）预测（辅助数据集）",
+      "source": "UCI Machine Learning Repository (ID 601)",
+      "license": "CC BY 4.0",
+      "raw": "data/raw/ai4i2020.csv",
+      "processed": [
+        "data/processed/ai4i_processed.csv",
+        "data/processed/ai4i_scaler.json"
+      ],
+      "samples": 10000,
+      "features": [
+        "Air temperature [K]",
+        "Process temperature [K]",
+        "Rotational speed [rpm]",
+        "Torque [Nm]",
+        "Tool wear [min]",
+        "Temp_diff_K",
+        "Power_proxy",
+        "Type_L",
+        "Type_M",
+        "Type_H"
+      ],
+      "target": "RUL = max(0, wear_limit - Tool wear [min])",
+      "wear_limit": 253.0,
+      "failure_samples": 339,
+      "split": "train/val/test = 70/15/15（按 Machine failure 分层）",
+      "steps": [
+        "缺失值填充（数值中位数/类别众数）",
+        "IQR 1.5 倍截断",
+        "派生特征（温差/功率代理量）",
+        "RUL 标签构造",
+        "Type one-hot 编码",
+        "Z-score 标准化（StandardScaler）",
+        "按 Machine failure 分层划分"
+      ]
+    },
+    "msm": {
+      "dataset": "MSM (Multi-Sensor and MTConnect) metal cutting anomaly",
+      "role": "刀具状态识别（正常/异常/刀具缺陷 三分类）+ 智能诊断（主数据集）",
+      "source": "Kaggle: manufuturetoday/multi-sensor-for-metal-milling-anomaly",
+      "license": "CC BY 4.0",
+      "raw": "D:/新建文件夹/archive_6.zip",
+      "processed": [
+        "data/processed/msm_features.csv",
+        "data/processed/msm_scaler.json"
+      ],
+      "segments": 2570,
+      "label_distribution": {
+        "0": 1928,
+        "1": 465,
+        "2": 177
+      },
+      "skipped_in_gaps": 5,
+      "skipped_note": "label.csv 标注 2575 段，其中 5 段 start/end 落在 mtc.csv 采样间隙内（该窗口无采样点）无法提取特征，已排除",
+      "per_split_label_distribution": {
+        "0": {
+          "test": 289,
+          "train": 1350,
+          "val": 289
+        },
+        "1": {
+          "test": 70,
+          "train": 325,
+          "val": 70
+        },
+        "2": {
+          "test": 27,
+          "train": 123,
+          "val": 27
+        }
+      },
+      "feature_count": 237,
+      "features_note": "时域(7)×31列 + 频域FFT(3带)×4列 + 切削参数6 + 方向one-hot2",
+      "split": "随机分层 train/val/test=70/15/15（按 label 分层，seed=42）",
+      "imbalance_handling": "报告不平衡，训练时类别加权/SMOTE",
+      "steps": [
+        "label 解析（start/end/label + 切削参数）",
+        "mtc.csv 时间切片对齐",
+        "时域特征(7) + 频域特征(FFT 3 频带)",
+        "近常数（低方差）列剔除",
+        "Z-score 标准化（训练集拟合）",
+        "train/val/test 划分（随机分层或按机床）"
+      ]
+    }
+  },
+  "updated": "2026-08-30"
+}
