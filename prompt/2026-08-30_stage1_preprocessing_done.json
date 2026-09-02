@@ -1,0 +1,75 @@
+{
+  "project": "CNC 铣削刀具磨损全生命周期预测与智能诊断系统",
+  "course": "制造智能技术课程设计",
+  "stage": "阶段1：数据预处理完成（D6，任务2）",
+  "session": {
+    "date": "2026-08-30",
+    "tool": "Claude Code (Harness)",
+    "model": "deepseek-v4-pro",
+    "methodology": "vibe coding"
+  },
+  "user_prompt": {
+    "original_request": "完成数据预处理：编写预处理程序，/data 下更新预处理后数据文件（或索引），并在 readme.md 同步更新。",
+    "context": "上一轮已完成 GitHub 密钥安全存储与本阶段任务记录；数据来源（MSM + AI4I 2020）已就绪。"
+  },
+  "ai_actions": [
+    {
+      "step": 1,
+      "action": "核对数据 schema",
+      "detail": "AI4I 2020：10,000 行 × 14 列、无缺失，Type(L/M/H)、Machine failure(339 失败)、Tool wear[0,253]。MSM：69 个实验目录严格 1 mtc.csv + 1 label.csv，label 的 start/end(秒) 与 mtc 的 time 对齐，标签 0/1/2。"
+    },
+    {
+      "step": 2,
+      "action": "编写 data/preprocess.py（AI4I RUL）",
+      "detail": "缺失值填充 → IQR 1.5 截断 → 派生特征（温差/功率代理）→ RUL=max(0,253-wear) 标签 → Type one-hot → Z-score 标准化 → 按 Machine failure 分层 70/15/15。输出 ai4i_processed.csv(10000×15) + ai4i_scaler.json。"
+    },
+    {
+      "step": 3,
+      "action": "编写 data/preprocess_msm.py（MSM 三分类）",
+      "detail": "label 解析 → mtc.csv 时间切片 → 时域(7 统计×31 列)+频域(FFT 3 频带×4 列)特征 → 近常数列剔除 → Z-score 标准化(训练集拟合) → 划分。输出 msm_features.csv(2570×242) + msm_scaler.json。"
+    },
+    {
+      "step": 4,
+      "action": "发现并处理数据特性",
+      "detail": "label.csv 标注 2,575 段中 5 段(均为 label=0)的 start/end 落在 mtc.csv 采样间隙内（该窗口 0 个采样点，如 dataset13 在 62.48s→65.66s 有 3.18s 记录跳变），无法从 mtc 提特征，已排除并告警记录，最终 2,570 段可用。"
+    },
+    {
+      "step": 5,
+      "action": "调整划分策略",
+      "detail": "原「按机床划分」的 test=工业机 tmf_vf10 仅 62 段且无 label=2(刀具缺陷)，无法评估缺陷类。改为默认「随机分层 70/15/15」(test 289/70/27 三类齐全)，保留 --split-by-machine 作跨机泛化 held-out 选项。"
+    },
+    {
+      "step": 6,
+      "action": "更新文档与索引",
+      "detail": "readme.md 与 data/README.md 的预处理章节由「阶段3 编写」改为「已完成」，更新目录结构、特征数、划分方式；index.json 记录双数据集来源/预处理步骤/标签分布/划分。"
+    }
+  ],
+  "key_decisions": [
+    {
+      "decision": "RUL = max(0, 253 - Tool wear [min])",
+      "reason": "253 为观测最大磨损量，作为磨损上限，RUL 为剩余可磨损时长，物理含义清晰。"
+    },
+    {
+      "decision": "默认随机分层划分，非按机床",
+      "reason": "按机床 held-out 的 test 集缺失 label=2 且仅 62 段，无法可靠评估三分类；随机分层保证三类均进 test。"
+    },
+    {
+      "decision": "排除落在 mtc 采样间隙的 5 段",
+      "reason": "该窗口无任何传感器采样点，无法提取特征，属数据集记录特性而非程序缺陷。"
+    }
+  ],
+  "files_created_or_modified": [
+    "data/preprocess.py（新增）",
+    "data/preprocess_msm.py（新增）",
+    "data/processed/ai4i_processed.csv、ai4i_scaler.json（新增）",
+    "data/processed/msm_features.csv、msm_scaler.json（新增）",
+    "data/processed/index.json（双数据集索引）",
+    "readme.md、data/README.md（预处理状态更新）"
+  ],
+  "stage_task_status": {
+    "数据来源": "已完成",
+    "数据预处理": "已完成",
+    "AI工具提示词追溯": "进行中（本记录）"
+  },
+  "backup_note": "上下文压缩前及时备份 prompt/ 目录。"
+}

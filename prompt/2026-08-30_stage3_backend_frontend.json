@@ -1,0 +1,105 @@
+{
+  "project": "CNC 铣削刀具磨损全生命周期预测与智能诊断系统",
+  "course": "制造智能技术课程设计",
+  "stage": "阶段3：后端与前端开发（D8–D9，任务4）",
+  "session": {
+    "date": "2026-08-30",
+    "tool": "Claude Code (Harness)",
+    "model": "deepseek-v4-pro",
+    "methodology": "vibe coding"
+  },
+  "user_prompt": {
+    "original_request": "继续（进行 D8–D9 后端 FastAPI 与前端 Streamlit 开发）",
+    "context": "D7–D8 算法模块（GA/状态分类/RUL/RAG）已完成，模型与 scaler 落盘 models/ 与 data/processed/。"
+  },
+  "ai_actions": [
+    {
+      "step": 1,
+      "action": "环境侦察与依赖安装",
+      "detail": "确认 fastapi/uvicorn/streamlit/pydantic 未装、requests/httpx 已装；pip 已配清华镜像，安装 fastapi 0.141.1 / pydantic 2.13.5 / uvicorn / streamlit。同时提取已训练模型 feature_names_in_（分类 237 维、RUL 9 维）与 scaler 键（MSM 229、AI4I 7）。"
+    },
+    {
+      "step": 2,
+      "action": "搭建后端 app/ 结构",
+      "detail": "config.py（路径）/ schemas.py（Pydantic v2 模型）/ registry.py（模型/scaler/知识库单例懒加载，线程锁）。"
+    },
+    {
+      "step": 3,
+      "action": "实现推理逻辑 inference.py",
+      "detail": "原始特征 → 标准化 → 预测：方向 one-hot + 6 切削参数透传 + 229 信号 Z-score；RUL 由 Type+4 过程量派生温差/功率再标准化。特征顺序统一取自模型 feature_names_in_，用 DataFrame 带列名消除 sklearn 告警。"
+    },
+    {
+      "step": 4,
+      "action": "实现样例生成 samples.py",
+      "detail": "从 test 集反向还原原始特征（raw=scaled*std+mean），供前端演示「原始输入→标准化→预测」链路并对比真实标签验证一致性。"
+    },
+    {
+      "step": 5,
+      "action": "实现路由与 SQLite",
+      "detail": "status/rul/diagnosis/history 四个路由 + db.py（sqlite3 stdlib，每次独立连接避免线程共享）。每次预测/诊断自动入库。"
+    },
+    {
+      "step": 6,
+      "action": "编写 main.py 与 Streamlit 前端",
+      "detail": "FastAPI 入口（lifespan 初始化 DB + 预热模型，CORS 放开）；web/app.py 五页看板（总览/状态识别/寿命预测/智能诊断/历史记录）。"
+    },
+    {
+      "step": 7,
+      "action": "端到端测试",
+      "detail": "TestClient 冒烟 + 真实 uvicorn 启动 + requests 走 HTTP：状态识别 6/6 与真实标签一致，RUL 在合理区间（符合 R²≈0.09 已知局限），中文诊断 top-1 正确，历史入库正常。"
+    },
+    {
+      "step": 8,
+      "action": "多维对抗式评审",
+      "detail": "用 Workflow 起 4 维独立评审（推理正确性/API 契约/错误处理安全/前后端一致）+ 对抗验证。评审确认 2 个真实缺陷：① 切削参数缺失静默填 0（应 400）；② 历史 limit 无约束（limit=-1 返回全表）。其余 5 项（CORS 无鉴权、方向无枚举、零方差除法、RUL scaler 缺键、SQLite 并发）经对抗验证为不可触发或上游已防护，驳回。"
+    },
+    {
+      "step": 9,
+      "action": "修复评审确认缺陷 + 补集成测试脚本",
+      "detail": "评审共确认 3 个真实缺陷并全部修复：① 切削参数缺失静默填 0 → inference.py 改 raise ValueError→400；② 历史 limit 无约束 → history.py 用 Query(ge=1,le=500) 约束（负值/0 返回 422）；③ float 字段接受 NaN/Infinity → schemas.py 对 RUL 字段加 allow_inf_nan=False、对 params/signals 加 field_validator 拒绝非有限值，main.py 加 RequestValidationError 处理器清洗错误详情（避免 nan 无法 JSON 序列化）。另 db.py 加 WAL+超时+有限重试（修复 Windows 偶发 SQLITE_READONLY）。新增 tests/test_api.py 集成测试，全部通过。"
+    }
+  ],
+  "key_decisions": [
+    {
+      "decision": "前端用 Streamlit（而非 Vue3）",
+      "reason": "方案设计将 Streamlit 列为优先方案，D8–D9 仅 1 天，Streamlit 开发效率高、满足看板需求。"
+    },
+    {
+      "decision": "样例驱动演示：test 集反向还原原始特征",
+      "reason": "状态识别需 237 维特征，手动输入不现实；从 test 集反标准化得到原始样例，前端「预测样例」可对比真实标签，验证端到端一致性。"
+    },
+    {
+      "decision": "推理特征顺序取自模型 feature_names_in_",
+      "reason": "避免手工对齐 237 维特征顺序出错；用 DataFrame 带列名让 sklearn 自动校验，消除 feature names 告警。"
+    },
+    {
+      "decision": "SQLite 用 stdlib sqlite3，每次独立连接",
+      "reason": "不引入 ORM 重依赖；FastAPI 同步端点在线程池运行，独立连接避免跨线程共享连接问题。"
+    }
+  ],
+  "files_created_or_modified": [
+    "app/（__init__.py、main.py、config.py、schemas.py、registry.py、inference.py、samples.py、db.py、routers/）新增",
+    "web/app.py（Streamlit 前端）新增",
+    "tests/test_api.py（API 集成测试）新增",
+    "app/README.md（后端/前端运行说明）新增",
+    "requirements.txt（项目依赖）新增",
+    "readme.md（结构/后端前端章节/进度更新）",
+    ".gitignore（忽略 predictions.db 及 WAL/SHM）",
+    "app/inference.py、app/routers/history.py、app/db.py（评审后修复）"
+  ],
+  "results": {
+    "API 接口": "8 个（health/status 预测与样例/RUL 预测与样例/诊断查询与知识库/历史）",
+    "状态识别端到端": "样例 6/6 与真实标签一致",
+    "RUL 预测": "样例在合理区间（误差符合 R²≈0.09 的已知数据局限）",
+    "RAG 诊断": "中文查询 top-1 正确召回",
+    "运行方式": "uvicorn app.main:app --port 8000 + streamlit run web/app.py"
+  },
+  "stage_task_status": {
+    "数据来源": "已完成",
+    "数据预处理": "已完成",
+    "AI工具提示词追溯": "已完成（含本记录）",
+    "D7-D8 算法模块开发": "已完成",
+    "D8-D9 后端与前端开发": "已完成"
+  },
+  "backup_note": "上下文压缩前及时备份 prompt/ 目录。"
+}

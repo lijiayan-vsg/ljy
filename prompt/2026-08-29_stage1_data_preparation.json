@@ -1,0 +1,91 @@
+{
+  "project": "CNC铣削刀具磨损全生命周期预测与智能诊断系统",
+  "course": "制造智能技术课程设计",
+  "stage": "阶段1：数据准备与预处理（对应进度表 D6）",
+  "session": {
+    "date": "2026-08-29",
+    "tool": "Claude Code (Harness)",
+    "model": "deepseek-v4-pro",
+    "methodology": "vibe coding"
+  },
+  "user_prompt": {
+    "original_request": "先读取分析该项目下的所有文件，并进行下述阶段任务：1) 数据来源；2) 数据预处理；3) AI工具提示词追溯（创建 prompt 目录，添加 AI 交流记录，并每阶段同步更新，上下文压缩前及时备份）。",
+    "stage_requirements": [
+      "数据来源：小数据直接提交 /data；公开数据集给出有效链接并在 /data 说明、readme 说明；自建大数据集需开源到 huggingface/modelscope 并注明自建；私有敏感数据不建议使用",
+      "数据预处理：完成预处理程序，/data 下更新预处理后数据文件或索引，readme 同步更新",
+      "AI工具提示词追溯：创建 prompt 目录，加入 AI 交流 JSON 记录，每阶段更新，上下文压缩前备份"
+    ]
+  },
+  "ai_actions": [
+    {
+      "step": 1,
+      "action": "读取并分析项目现有文件",
+      "detail": "通读 选题说明.md、方案设计.md、学习笔记.md、制造智能技术课程设计任务书(1).pdf，确认项目为 CNC 铣削刀具磨损预测与智能诊断系统，明确数据需求（多传感器振动/声音/切削力/扭矩信号 + 磨损标签）。"
+    },
+    {
+      "step": 2,
+      "action": "核实候选数据集真实性与链接有效性",
+      "detail": "对方案设计中列出的三个候选数据集逐一进行网络检索核实，确认 MSM（Nature Sci Data 2026 / Kaggle）、Bosch CNC（UCI ID 752）、Mondragon MU-TCM（Nature Sci Data 2025 / eBiltegia）均真实存在且链接有效，并获取准确 DOI 与许可协议。"
+    },
+    {
+      "step": 3,
+      "action": "确定数据获取策略",
+      "detail": "选定 AI4I 2020 预测性维护数据集作为可直接提交的小数据（约 522KB，含 Torque/Tool wear 等本项目相关字段），实际下载并提交到 data/raw/；MSM/Bosch/Mondragon 作为公开大数据集，提供下载脚本与链接说明。"
+    },
+    {
+      "step": 4,
+      "action": "编写并运行数据预处理程序",
+      "detail": "编写 data/preprocess.py，实现缺失值填充、IQR 异常值截断、特征工程、三分类磨损标签与 RUL 目标构造、one-hot 编码、Z-score 归一化、时序滑窗切分；实际运行产出 ai4i2020_processed.csv、sliding_window_demo.npz、index.json。"
+    },
+    {
+      "step": 5,
+      "action": "编写数据来源说明与下载脚本",
+      "detail": "编写 data/README.md 数据来源说明、data/download_data.py 大数据集下载脚本（bosch/msm/mondragon 三个子命令）。"
+    },
+    {
+      "step": 6,
+      "action": "创建 prompt 追溯记录与项目 readme",
+      "detail": "创建本 prompt 记录 JSON 与项目根目录 readme.md。"
+    }
+  ],
+  "key_decisions": [
+    {
+      "decision": "主数据集选择",
+      "reason": "方案设计.md 首选 MSM 数据集，但 MSM 为 Kaggle 上的数 GB 级多模态数据，需 Kaggle 账号/API 且无法在本地即时下载；因此补充 AI4I 2020（小、可直接下载、含扭矩与刀具磨损字段）作为可立即运行的小数据集，用于验证预处理与建模流程，同时保留 MSM 作为正式训练数据。"
+    },
+    {
+      "decision": "磨损状态三分类阈值",
+      "reason": "按刀具磨损时间（分钟）划分：初期磨损 <60、正常磨损 60–180、严重磨损 ≥180；阈值作为可配置项写入代码与 index.json，便于后续根据 MSM 实际标注调整。"
+    },
+    {
+      "decision": "RUL 目标构造",
+      "reason": "以磨损上限 250 min 减去当前磨损作为剩余寿命代理目标（clip 至 ≥0），符合课程设计中寿命预测模块的回归任务需求。"
+    },
+    {
+      "decision": "数据目录结构",
+      "reason": "采用 data/raw（原始）+ data/processed（预处理后 + index.json 索引）分层，预处理程序与下载脚本置于 data/ 下，脚本可复用并支持命令行参数，便于后续阶段扩展。"
+    }
+  ],
+  "files_created_or_modified": [
+    "data/raw/ai4i2020.csv",
+    "data/processed/ai4i2020_processed.csv",
+    "data/processed/sliding_window_demo.npz",
+    "data/processed/index.json",
+    "data/preprocess.py",
+    "data/download_data.py",
+    "data/README.md",
+    "prompt/2026-08-29_stage1_data_preparation.json",
+    "readme.md"
+  ],
+  "verified_dataset_links": [
+    "MSM 论文: https://doi.org/10.1038/s41597-026-07255-7",
+    "MSM 数据(Kaggle): https://doi.org/10.34740/kaggle/ds/8392825",
+    "Bosch CNC (UCI ID 752): https://archive.ics.uci.edu/dataset/752/bosch+cnc+machining+dataset",
+    "Bosch CNC (GitHub): https://github.com/boschresearch/CNC_Machining",
+    "Mondragon 论文: https://doi.org/10.1038/s41597-025-05168-5",
+    "Mondragon 数据(eBiltegia): https://doi.org/10.48764/3hdp-gf23",
+    "Mondragon 代码(Zenodo): https://doi.org/10.5281/zenodo.14055658",
+    "AI4I 2020 (UCI): https://archive.ics.uci.edu/ml/machine-learning-databases/00601/ai4i2020.csv"
+  ],
+  "backup_note": "本记录为阶段1（数据准备与预处理）的 prompt 追溯备份。按课程要求，后续每个阶段需同步更新 prompt/ 目录，并务必在上下文压缩前及时备份 AI 交流记录。"
+}

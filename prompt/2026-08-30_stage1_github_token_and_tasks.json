@@ -1,0 +1,47 @@
+{
+  "project": "CNC 铣削刀具磨损全生命周期预测与智能诊断系统",
+  "course": "制造智能技术课程设计",
+  "stage": "阶段1：数据来源 + 数据预处理 + AI工具提示词追溯（D6）",
+  "session": {
+    "date": "2026-08-30",
+    "tool": "Claude Code (Harness)",
+    "model": "deepseek-v4-pro",
+    "methodology": "vibe coding"
+  },
+  "user_prompt": {
+    "original_request": "提供 GitHub 个人访问令牌（PAT），要求：仅存入本机加密凭据管理器、不得写入仓库文件；测试连通性；并将本阶段任务同步记录。",
+    "stage_tasks": [
+      "数据来源：小数据直接提交到仓库 /data 目录；公开数据集给出有效链接并在 /data 写说明、在项目 readme.md 中说明；自建大数据集在 huggingface/modelscope 开源并注明自建；私有敏感数据不建议用于课设。",
+      "数据预处理：根据项目需要完成原始数据预处理，编写预处理程序，/data 下更新预处理后数据文件（或索引），并在 readme.md 同步更新相关工作。",
+      "AI工具提示词追溯：创建 prompt 目录，将 AI 交流记录（json）加入该目录，每阶段同步更新，上下文压缩前及时备份 prompt 记录。"
+    ]
+  },
+  "ai_actions": [
+    {
+      "step": 1,
+      "action": "GitHub 密钥安全存储",
+      "detail": "将 PAT 存入 Windows 凭据管理器（Git Credential Manager，DPAPI 加密，目标 git:https://github.com），未写入任何仓库文件。发现权限系统会把带密钥的 Bash 命令原文自动写入 .claude/settings.json，已用脚本清除明文 token 并复查无残留。"
+    },
+    {
+      "step": 2,
+      "action": "连通性测试",
+      "detail": "curl GitHub API /user 返回 HTTP 200，认证账号 lijiayan-vsg（id 219103012）；git credential fill 可正常取回凭据，证明存储与取回链路正常。"
+    },
+    {
+      "step": 3,
+      "action": "阶段任务状态同步",
+      "detail": "数据来源已完成（MSM 主 + AI4I 2020 辅助，双数据集）；数据预处理程序（preprocess.py / preprocess_msm.py）待编写；prompt/ 目录已存在并持续更新。"
+    }
+  ],
+  "stage_task_status": {
+    "数据来源": "已完成",
+    "数据预处理": "待完成（data/preprocess.py、data/preprocess_msm.py）",
+    "AI工具提示词追溯": "进行中（本记录）"
+  },
+  "files_created_or_modified": [
+    "prompt/2026-08-30_stage1_github_token_and_tasks.json（本记录）",
+    ".claude/settings.json（清除自动记录的明文 token）"
+  ],
+  "security_note": "GitHub PAT 仅存于 Windows 凭据管理器（加密），未写入仓库文件；已清除 .claude/settings.json 中权限系统自动记录的明文 token。",
+  "backup_note": "上下文压缩前及时备份 prompt/ 目录。"
+}

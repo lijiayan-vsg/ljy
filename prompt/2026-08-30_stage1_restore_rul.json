@@ -1,0 +1,52 @@
+{
+  "project": "CNC 铣削刀具磨损全生命周期预测与智能诊断系统",
+  "course": "制造智能技术课程设计",
+  "stage": "阶段1：数据来源准备（D6）——数据集约束解除与 RUL 模块恢复",
+  "session": {
+    "date": "2026-08-30",
+    "tool": "Claude Code (Harness)",
+    "model": "deepseek-v4-pro",
+    "methodology": "vibe coding"
+  },
+  "user_prompt": {
+    "original_request": "解除之前「无法使用 CWRU/AI4I 2020/C-MAPSS/NEU」的限制（可随意使用数据集）；基于 D:\\ljy 的 .md 文件完成后续课设；已下载的 MSM 数据集不变但可增加数据集；找出文档中需要修改的地方。",
+    "decision": "恢复「剩余寿命(RUL)预测」模块，补充 AI4I 2020 数据集做寿命回归；MSM 继续做主数据集（状态识别 + 诊断）。"
+  },
+  "ai_actions": [
+    {
+      "step": 1,
+      "action": "梳理各 .md 需要修改的位置",
+      "detail": "逐文件列出受「数据集限制解除」影响的位置：选题说明/方案设计/readme/data README 的题目、完成目标、功能模块、API、算法模块、数据集章节、参考文献等，以及学习笔记.md 中 NASA/AI4I 引用与 RUL 描述。"
+    },
+    {
+      "step": 2,
+      "action": "重新下载 AI4I 2020",
+      "detail": "从 UCI 直链重新下载 ai4i2020.csv（522 KB）到 data/raw/，恢复上一轮误删的小数据。"
+    },
+    {
+      "step": 3,
+      "action": "回改四个 .md 文件",
+      "detail": "恢复题目为「刀具磨损全生命周期预测」，恢复 RUL 目标/模块/API/LSTM/GA 寻优目标，数据集章节改为 MSM（主）+ AI4I 2020（辅助），参考文献补 Matzka 2020。"
+    }
+  ],
+  "key_decisions": [
+    {
+      "decision": "恢复 RUL 模块",
+      "reason": "数据集限制解除后，可补充带连续磨损量字段的 AI4I 2020 做寿命回归，从而恢复原选题「全生命周期预测」的完整功能。"
+    },
+    {
+      "decision": "MSM 主 + AI4I 辅助的双数据集方案",
+      "reason": "MSM 无连续磨损量，做三分类+诊断最合适；AI4I 2020 含 Tool wear [min] 连续字段，做 RUL 回归最合适。两者互补，覆盖选题全部功能。"
+    }
+  ],
+  "files_created_or_modified": [
+    "选题说明.md（恢复 RUL）",
+    "方案设计.md（恢复 RUL + 补 AI4I）",
+    "readme.md（恢复 RUL + 双数据集）",
+    "data/README.md（MSM + AI4I 双数据集）",
+    "data/raw/ai4i2020.csv（重新下载）",
+    "data/download_data.py（增加 AI4I 下载）",
+    "prompt/2026-08-30_stage1_restore_rul.json（本记录）"
+  ],
+  "backup_note": "本记录为阶段1数据来源准备的数据集方案调整备份。后续阶段需同步更新 prompt/ 目录，并在上下文压缩前及时备份 AI 交流记录。"
+}

@@ -1,0 +1,100 @@
+{
+  "project": "CNC 铣削刀具磨损全生命周期预测与智能诊断系统",
+  "course": "制造智能技术课程设计",
+  "stage": "阶段2：算法模块开发（D7–D8，任务3）",
+  "session": {
+    "date": "2026-08-30",
+    "tool": "Claude Code (Harness)",
+    "model": "deepseek-v4-pro",
+    "methodology": "vibe coding"
+  },
+  "user_prompt": {
+    "original_request": "依照任务书，继续（进行 D7–D8 算法模块开发：遗传算法调优 → 状态分类 → 寿命预测 → 知识库）",
+    "context": "数据来源、数据预处理已完成；方案设计.md 规划了四个算法模块（GA / 状态识别 / LSTM 寿命预测 / ChromaDB RAG）。"
+  },
+  "ai_actions": [
+    {
+      "step": 1,
+      "action": "环境依赖核对",
+      "detail": "确认已装 numpy 2.4.2 / pandas 3.0.5 / sklearn 1.9.0 / scipy / joblib；未装 xgboost / torch / chromadb / deap / sentence_transformers。据此决定零重依赖实现。"
+    },
+    {
+      "step": 2,
+      "action": "修复数据列名冲突",
+      "detail": "ai4i_processed.csv 中 Tool wear [min] 出现两次（标准化特征 + 原始参考列），pandas 自动改名 .1。将原始参考列改名 wear_raw 并重建 ai4i_processed.csv。"
+    },
+    {
+      "step": 3,
+      "action": "搭建 src/ 模块结构",
+      "detail": "新建 src/ 包：paths.py（路径常量）、ga.py、classifier.py、rul.py、rag.py、knowledge_base.json。"
+    },
+    {
+      "step": 4,
+      "action": "手写遗传算法 ga.py",
+      "detail": "不依赖 deap，从零实现：实数/整数/离散混合编码、锦标赛选择、单点交叉、逐基因变异、精英保留、适应度缓存。适配任意 sklearn 估计器。"
+    },
+    {
+      "step": 5,
+      "action": "实现状态三分类 classifier.py",
+      "detail": "随机森林/梯度提升 + class_weight=balanced；GA 适应度=3 折分层交叉验证 macro-F1（发现单 val 集寻优会过拟合，改为 CV）。test acc=96.11%、macro-F1=0.9444。"
+    },
+    {
+      "step": 6,
+      "action": "实现 RUL 预测 rul.py（含关键防泄漏修复）",
+      "detail": "初版 R²=1.0 为数据泄漏（特征含磨损量本身，而 RUL 由磨损量直接构造）。剔除磨损量后 R²≈0.09，如实记录 AI4I 磨损量与加工参数解耦的数据特性。GA 适应度=3 折 CV neg-MAE。"
+    },
+    {
+      "step": 7,
+      "action": "实现 RAG 知识库 rag.py",
+      "detail": "TF-IDF + 余弦相似度；中文无空格导致默认分词检索失败，改用 char_wb 字符 n-gram(2~3 元) 后正常召回。构建 10 条诊断知识条目。"
+    },
+    {
+      "step": 8,
+      "action": "训练与评估",
+      "detail": "分类器 RF+GA（2m32s）、RUL RF/GBR/MLP + GA 全部跑通，模型与指标落盘 models/。"
+    },
+    {
+      "step": 9,
+      "action": "更新文档",
+      "detail": "新增 src/README.md（模块说明+结果+实现适配）；readme.md 进度 D7–D8 置完成、补充算法模块章节；方案设计.md 补实现适配说明；.gitignore 忽略 models/*.joblib 与 .claude/。"
+    }
+  ],
+  "key_decisions": [
+    {
+      "decision": "零重依赖实现（不装 xgboost/torch/chromadb/deap）",
+      "reason": "环境未装且国内安装重依赖易失败；用 sklearn 随机森林/梯度提升/MLP 代替 XGBoost/LSTM，手写 GA 代替 deap，TF-IDF+余弦代替 ChromaDB，全部功能等价且代码可复现。"
+    },
+    {
+      "decision": "修复 RUL 数据泄漏：剔除磨损量本身",
+      "reason": "RUL 由 Tool wear 直接构造，特征含磨损量时 R² 虚假达 1.0；剔除后仅用过程信号（温度/扭矩/转速/类型）推断 RUL，R²≈0.09 才是真实水平。"
+    },
+    {
+      "decision": "GA 适应度用 3 折交叉验证而非单一验证集",
+      "reason": "单 val 集寻优会过拟合该切分，导致 GA 结果反而不如默认参数；CV 更稳健、方法学更严谨。"
+    },
+    {
+      "decision": "RAG 用字符 n-gram 处理中文",
+      "reason": "中文无空格，默认 \\b\\w+\\b 分词把整句当一个词导致检索失败；char_wb(2~3 元) 无需 jieba 即可正确召回。"
+    }
+  ],
+  "files_created_or_modified": [
+    "src/__init__.py、src/paths.py、src/ga.py、src/classifier.py、src/rul.py、src/rag.py、src/knowledge_base.json（新增）",
+    "src/README.md（新增，算法模块文档）",
+    "data/preprocess.py（修改：wear_raw 列名修复）",
+    "data/processed/ai4i_processed.csv（重建，消除重复列名）",
+    "models/status_classifier.joblib、rul_model.joblib 及 *_best_params.json、*_metrics.json（新增）",
+    "readme.md、方案设计.md、.gitignore（更新）"
+  ],
+  "results": {
+    "状态三分类（RF+GA，test 386 段）": "accuracy=96.11%，macro-F1=0.9444，weighted-F1=0.9617",
+    "RUL（RF+GA，test 1500 行）": "MAE=49.53 min，RMSE=60.79，R²=0.0933（磨损量解耦所致，如实记录）",
+    "RAG": "10 条知识条目，char n-gram 检索 Top-K 正确召回诊断建议"
+  },
+  "stage_task_status": {
+    "数据来源": "已完成",
+    "数据预处理": "已完成",
+    "AI工具提示词追溯": "已完成（含本记录）",
+    "D7-D8 算法模块开发": "已完成（GA/状态分类/RUL/RAG）"
+  },
+  "backup_note": "上下文压缩前及时备份 prompt/ 目录。"
+}

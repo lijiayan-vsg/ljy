@@ -1,0 +1,63 @@
+{
+  "project": "CNC 铣削刀具状态监测与智能诊断系统（重构后）",
+  "course": "制造智能技术课程设计",
+  "stage": "阶段1：数据来源准备（D6）——选题口径重构与数据集确认",
+  "session": {
+    "date": "2026-08-30",
+    "tool": "Claude Code (Harness)",
+    "model": "deepseek-v4-pro",
+    "methodology": "vibe coding"
+  },
+  "user_prompt": {
+    "original_request": "总结课设进度；确认从 Kaggle (manufuturetoday/multi-sensor-for-metal-milling-anomaly) 下载的数据集是否符合选题；给出完成第三阶段的详细步骤。",
+    "constraints": "课程要求禁止使用 CWRU、AI4I 2020、C-MAPSS、NEU 等数据集；修改 .md 文件时输出可直接替换的完整文本。",
+    "decision": "仅使用 MSM 数据集，将选题从「刀具磨损全生命周期预测」重构为「刀具状态监测与智能诊断（正常/异常/刀具缺陷三分类 + 诊断）」，去除 RUL 预测模块。"
+  },
+  "ai_actions": [
+    {
+      "step": 1,
+      "action": "探查 archive_6.zip 数据集",
+      "detail": "确认其为 MSM 数据集：3 台机床（imi_vm20i 37 / imi_vmx30ui 19 / tmf_vf10 13 实验）、69 次实验、2575 个切片段；多模态文件 mtc.csv(51列)/acc.csv(2ch~50kHz)/ct.csv(1ch)/wav/mp4/nc(G代码)/label.csv；三级标签 0=正常1933 / 1=异常465 / 2=刀具缺陷177。"
+    },
+    {
+      "step": 2,
+      "action": "评估选题符合度",
+      "detail": "结论：MSM 为异常/刀具缺陷检测数据集，可支撑状态识别(3分类)+智能诊断+GA调优，但不含连续磨损量/RUL 标签，无法直接支撑原选题的磨损三阶段与 RUL 预测。"
+    },
+    {
+      "step": 3,
+      "action": "确定口径并重构文档",
+      "detail": "按用户决策重构为「刀具状态监测与智能诊断」，去除 AI4I 2020 相关产物（data/raw/ai4i2020.csv、data/processed/*、data/preprocess.py），重写选题说明/方案设计/readme/data README 四个 .md。"
+    }
+  ],
+  "key_decisions": [
+    {
+      "decision": "选题重构",
+      "reason": "MSM 无磨损量/RUL 标签，仅能支撑异常/缺陷分类与诊断；且课程禁止使用 AI4I 2020 等数据集，故仅用 MSM，去除 RUL 与磨损三阶段，聚焦状态三分类+诊断。"
+    },
+    {
+      "decision": "移除 AI4I 2020",
+      "reason": "课程明确禁止使用 AI4I 2020，上一阶段误引入，本轮删除其数据与预处理脚本，改用 MSM 专用预处理程序 preprocess_msm.py。"
+    },
+    {
+      "decision": "跨机划分数据",
+      "reason": "MSM 含实验室(imi_vm20i/vmx30ui)与工业(tmf_vf10)三类机床，按机床划分 train/val/test 可支撑跨机泛化研究，作为答辩亮点。"
+    }
+  ],
+  "files_created_or_modified": [
+    "选题说明.md（重构）",
+    "方案设计.md（重构）",
+    "readme.md（重构）",
+    "data/README.md（重构）",
+    "data/download_data.py（简化为 MSM-only，修正 Kaggle slug）",
+    "prompt/2026-08-30_stage1_reframe_msm.json（本记录）"
+  ],
+  "files_removed": [
+    "data/raw/ai4i2020.csv",
+    "data/processed/ai4i2020_processed.csv",
+    "data/processed/sliding_window_demo.npz",
+    "data/processed/index.json",
+    "data/preprocess.py"
+  ],
+  "backup_note": "本记录为阶段1数据来源准备的选题口径重构备份。后续阶段需同步更新 prompt/ 目录，并在上下文压缩前及时备份 AI 交流记录。"
+}
