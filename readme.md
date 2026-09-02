@@ -28,8 +28,8 @@
 │   ├── download_data.py      # 数据集下载脚本
 │   ├── preprocess_msm.py     # MSM 数据预处理程序（状态识别，已完成）
 │   ├── preprocess.py         # AI4I 2020 数据预处理程序（RUL，已完成）
-│   ├── raw/                  # 原始数据（小数据直接提交）
-│   │   └── ai4i2020.csv      # AI4I 2020（约 522 KB，小数据）
+│   ├── raw/                  # 原始数据（不入库，提交链接 + 下载脚本）
+│   │   └── ai4i2020.csv      # AI4I 2020（约 522 KB，本地运行用）
 │   └── processed/            # 预处理后特征矩阵 + 数据索引
 │       ├── msm_features.csv / msm_scaler.json
 │       ├── ai4i_processed.csv / ai4i_scaler.json
@@ -59,14 +59,14 @@
 
 ## 数据来源
 
-数据来源遵循课程设计要求：**小数据直接提交到 `/data`；公开大数据集给出有效链接并说明；不涉及私有敏感数据**。详见 [data/README.md](data/README.md)。
+数据来源遵循课程设计要求：**原始数据一律不提交仓库，仅提交有效来源链接与下载脚本；预处理后的特征矩阵提交到 `/data/processed`；不涉及私有敏感数据**。详见 [data/README.md](data/README.md)。
 
 | 数据集 | 用途 | 许可 | 链接 | 状态 |
 |--------|------|------|------|------|
 | MSM（Multi-Sensor and MTConnect） | 状态识别 + 智能诊断（三级标注：正常/异常/刀具缺陷） | CC BY 4.0 | [Kaggle](https://www.kaggle.com/datasets/manufuturetoday/multi-sensor-for-metal-milling-anomaly) · [论文](https://doi.org/10.1038/s41597-026-07255-7) | ✅ 已下载（14.2 GB） |
-| AI4I 2020 预测性维护 | 剩余寿命（RUL）预测（含连续 Tool wear 字段） | CC BY 4.0 | [UCI](https://archive.ics.uci.edu/ml/machine-learning-databases/00601/ai4i2020.csv) | ✅ 已提交（小数据） |
+| AI4I 2020 预测性维护 | 剩余寿命（RUL）预测（含连续 Tool wear 字段） | CC BY 4.0 | [UCI](https://archive.ics.uci.edu/ml/machine-learning-databases/00601/ai4i2020.csv) | ✅ 链接已登记 |
 
-> 注：MSM 为公开大数据集（压缩 14.2 GB / 解压约 40 GB），不提交到 git 仓库，仅本地解压存放并在 `/data` 记录有效来源链接；AI4I 2020 为小数据，直接提交到 `data/raw/`。
+> 注：两个数据集的原始数据均不提交到 git 仓库，仅在 `/data` 记录有效来源链接并提供 `data/download_data.py` 下载脚本；预处理后的特征矩阵提交到 `data/processed/`。
 
 ## 数据预处理
 

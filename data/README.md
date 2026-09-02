@@ -1,6 +1,6 @@
 # 数据来源与预处理说明
 
-本目录存放本项目「CNC 铣削刀具磨损全生命周期预测与智能诊断系统」所用的原始数据、预处理程序及预处理后的数据文件。数据来源遵循课程设计阶段要求：**小数据直接提交到仓库 `/data` 目录；公开大数据集给出有效来源链接并在本文件说明；不涉及私有敏感数据**。
+本目录存放本项目「CNC 铣削刀具磨损全生命周期预测与智能诊断系统」所用的原始数据、预处理程序及预处理后的数据文件。数据来源遵循课程设计阶段要求：**原始数据一律不提交仓库，仅提交有效来源链接与下载脚本；预处理后的特征矩阵提交到 `/data/processed`；不涉及私有敏感数据**。
 
 ## 目录结构
 
@@ -10,8 +10,8 @@ data/
 ├── download_data.py         # 数据集下载脚本（MSM / AI4I）
 ├── preprocess_msm.py        # MSM 数据预处理程序（状态识别，已完成）
 ├── preprocess.py            # AI4I 2020 数据预处理程序（RUL，已完成）
-├── raw/                     # 原始数据
-│   └── ai4i2020.csv         # AI4I 2020（10,000 行，约 522 KB，小数据直接提交）
+├── raw/                     # 原始数据（不入库，提交链接 + download_data.py 下载）
+│   └── ai4i2020.csv         # AI4I 2020（10,000 行，约 522 KB，本地运行用）
 └── processed/               # 预处理后特征矩阵 + 数据索引
     ├── msm_features.csv     # MSM 特征矩阵（2,570 段 × 237 特征 + 标签/划分）
     ├── msm_scaler.json      # MSM 标准化参数（推理复用）
@@ -25,7 +25,7 @@ data/
 | 数据集 | 角色 | 用途 | 许可 | 获取方式 | 状态 |
 |--------|------|------|------|----------|------|
 | MSM（Multi-Sensor and MTConnect） | 主数据集 | 刀具状态识别（正常/异常/刀具缺陷三分类）+ 智能诊断 | CC BY 4.0 | Kaggle | ✅ 已下载 |
-| AI4I 2020 预测性维护 | 辅助数据集 | 剩余寿命（RUL）预测 | CC BY 4.0 | UCI（小数据直接提交） | ✅ 已提交 |
+| AI4I 2020 预测性维护 | 辅助数据集 | 剩余寿命（RUL）预测 | CC BY 4.0 | UCI（提交下载链接） | ✅ 链接已登记 |
 
 ### 1. MSM（Multi-Sensor and MTConnect）数据集（主数据集）
 
@@ -76,7 +76,7 @@ data/
 - **下载链接**：https://archive.ics.uci.edu/ml/machine-learning-databases/00601/ai4i2020.csv
 - **论文**：S. Matzka, "Explainable Artificial Intelligence for Predictive Maintenance Applications", 2020.
 - **许可**：CC BY 4.0
-- **规模**：10,000 行 × 14 列，约 522 KB（小数据，直接提交）
+- **规模**：10,000 行 × 14 列，约 522 KB（提交下载链接，本地运行前 `python data/download_data.py ai4i` 获取）
 - **关键字段**：`Air temperature [K]`、`Process temperature [K]`、`Rotational speed [rpm]`、`Torque [Nm]`、`Tool wear [min]`、`Machine failure`、`Type`（L/M/H）等。
 
 ## 二、数据预处理

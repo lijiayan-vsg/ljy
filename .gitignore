@@ -6,10 +6,11 @@ __pycache__/
 venv/
 .env
 
-# 大数据集（公开大数据集不提交仓库，通过 data/download_data.py 下载）
+# 原始数据一律不入库（仅提交下载链接 + data/download_data.py 下载脚本）
 data/raw/msm/
 data/raw/bosch_cnc/
 data/raw/mondragon_mu_tcm/
+data/raw/ai4i2020.csv
 
 # 运行产物
 *.log
