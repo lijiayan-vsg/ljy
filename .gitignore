@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# 大数据集（公开大数据集不提交仓库，通过 data/download_data.py 下载）
+data/raw/msm/
+data/raw/bosch_cnc/
+data/raw/mondragon_mu_tcm/
+
+# 运行产物
+*.log
+.DS_Store
+
+# SQLite 预测历史（运行时生成，含 WAL/SHM）
+data/predictions.db
+data/predictions.db-wal
+data/predictions.db-shm
+
+# 训练模型（可由脚本重新生成，体积大不提交）
+models/*.joblib
+
+# Claude Code 本地配置/会话历史（可能含凭据，勿提交）
+.claude/
