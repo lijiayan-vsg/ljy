@@ -1,0 +1,11 @@
+{
+  "model": "rf",
+  "params": {
+    "n_estimators": 145,
+    "max_depth": 26,
+    "min_samples_leaf": 4,
+    "max_features": null
+  },
+  "seed": 42,
+  "fitness": "3-fold CV neg-MAE"
+}

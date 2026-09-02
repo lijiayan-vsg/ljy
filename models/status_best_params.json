@@ -1,0 +1,11 @@
+{
+  "model": "rf",
+  "params": {
+    "n_estimators": 235,
+    "max_depth": 20,
+    "min_samples_leaf": 4,
+    "max_features": "sqrt"
+  },
+  "seed": 42,
+  "fitness": "3-fold CV macro-F1"
+}
